@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Guess the Driver
 
-## Getting Started
+A small F1 driver guessing app built with Next.js on the frontend and an Express + PostgreSQL backend.
 
-First, run the development server:
+Users can:
+- search for drivers by name
+- view driver details
+- compare a guessed driver against the daily selected driver
+- use the `/random` endpoint to get the driver of the day
+
+## Tech Stack
+
+- Frontend: Next.js
+- Backend: Express.js
+- Database: PostgreSQL
+- Styling: Tailwind CSS
+
+## Project Structure
+
+```bash
+.
+├── src/
+│   ├── app/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── model/
+│   ├── routes/
+│   └── index.js
+├── public/
+├── package.json
+├── .env
+├── README.md
+├── next.config.mjs
+├── postcss.config.mjs
+├── eslint.config.mjs
+└── jsconfig.json
+```
+
+## Local Setup
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Create a `.env` file
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=test
+DB_TABLE=driver
+PORT=5000
+```
+
+Make sure PostgreSQL is running locally and the database has the expected table structure.
+
+### 3) Start the backend
+
+```bash
+npm run backend
+```
+
+This runs the Express API on:
+
+```bash
+http://localhost:5000
+```
+
+### 4) Start the frontend
+
+In a separate terminal:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API Routes
 
-## Learn More
+### GET /health
+Returns the backend health status.
 
-To learn more about Next.js, take a look at the following resources:
+### GET /api/drivers
+Searches for drivers by name.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Example:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+http://localhost:5000/api/drivers?name=hamilton
+```
 
-## Deploy on Vercel
+### GET /api/drivers/names
+Returns driver names for the autocomplete list.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### GET /api/drivers/random
+Returns the selected driver of the day.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Database Notes
+
+The app expects a PostgreSQL table named `driver` by default unless `DB_TABLE` is changed.
+
+Common fields used by the app include:
+- `drivername`
+- `nationality`
+- `champion`
+- `years_active`
+- `active`
+
+## Deployment Notes
+
+### Backend
+Deploy the Express server to a service like Render.
+
+Use the real hosted PostgreSQL credentials instead of `localhost` in production.
+
+### Frontend
+Deploy the Next.js app to Vercel.
+
+Set a public backend URL in the frontend environment, such as:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend-url.com
+```
+
+Then use that value instead of hardcoded `http://localhost:5000`.
+
+## Notes
+
+- This project is currently set up as a local development environment with a separate frontend and backend.
+- For public hosting, the backend must be deployed to a public service and the frontend must use that public URL.
+
+## License
+
+This project is for personal learning and development use.
