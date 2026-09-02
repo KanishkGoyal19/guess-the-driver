@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const API_URL = process.env.RENDER_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_RENDER_API_URL || "http://localhost:5000";
 
 function formatValue(value) {
   if (value === null || value === undefined || value === "") {
