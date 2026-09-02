@@ -23,7 +23,7 @@ export const randomDriverService = async () => {
 };
 
 export const driverNameService = async () => {
-  const tableName = process.env.DB_TABLE || "driver";
+  const tableName = "driver";
 
   const queryText = `
     SELECT drivername
@@ -38,7 +38,7 @@ export const driverNameService = async () => {
 };
 
 export const allDriverService = async (searchName = "") => {
-  const tableName = process.env.DB_TABLE || "driver";
+  const tableName = "driver"
   const trimmed = searchName?.trim();
 
   const queryText = trimmed
