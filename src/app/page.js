@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 function formatValue(value) {
   if (value === null || value === undefined || value === "") {
     return "—";
@@ -32,7 +34,7 @@ function App() {
   useEffect(() => {
     const loadDriverNames = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/drivers/names");
+        const response = await fetch(`${API_URL}/api/drivers/names`);
 
         if (!response.ok) {
           throw new Error("Unable to load driver names from the backend");
@@ -72,7 +74,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/drivers?name=${encodeURIComponent(trimmedTerm)}`
+        `${API_URL}/api/drivers?name=${encodeURIComponent(trimmedTerm)}`
       );
 
       if (!response.ok) {
