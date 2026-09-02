@@ -2,6 +2,7 @@
   "name": "guess-the-driver",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "backend": "nodemon src/index.js",
     "dev": "next dev",
