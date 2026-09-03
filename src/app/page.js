@@ -6,12 +6,33 @@ const API_URL =
 
 function getDriverStats(driver) {
   return [
-    { label: "Nationality", value: driver.nationality },
-    { label: "Champion", value: driver.champion },
-    { label: "Active", value: driver.active },
-    { label: "Decade", value: driver.decade },
-    { label: "Years Active", value: driver.years_active },
+    { key: "nationality", label: "Nationality", value: driver.nationality },
+    { key: "champion", label: "Champion", value: driver.champion },
+    { key: "active", label: "Active", value: driver.active },
+    { key: "decade", label: "Decade", value: driver.decade },
+    { key: "years_active", label: "Years Active", value: driver.years_active },
   ];
+}
+
+function compareDrivers(guessedDriver, dailyDriver) {
+  return {
+    nationality: guessedDriver.nationality === dailyDriver.nationality ? "Correct" : "Wrong",
+    champion: guessedDriver.champion === dailyDriver.champion ? "Correct" : "Wrong",
+    active: guessedDriver.active === dailyDriver.active ? "Correct" : "Wrong",
+    decade: guessedDriver.decade === dailyDriver.decade ? "Correct" : Math.abs(guessedDriver.decade - dailyDriver.decade) === 20 ? "Close: " : "Wrong",
+    years_active:guessedDriver.years_active === dailyDriver.years_active? "Correct": Math.abs(guessedDriver.years_active - dailyDriver.years_active) <= 5 ? "Close: " : "Wrong",
+  };
+}
+
+function getColors(status) {
+  switch (status) {
+    case "Correct":
+      return "bg-green-600 text-white";
+    case "Close: ":
+      return "bg-yellow-600 text-white";  
+    default:
+      return "bg-zinc-800 text-white";
+  }
 }
 
 function App() {
@@ -20,7 +41,9 @@ function App() {
   const [guesses, setGuesses] = useState([]);
   const [guessesLoaded, setGuessesLoaded] = useState(false);
   const [error, setError] = useState("");
+  const [dailyDriver, setDailyDriver] = useState(null);
 
+  // Load the guesses from local storage when the component mounts
   useEffect(() => {
     try {
       const savedGuesses = window.localStorage.getItem("driver-guesses");
@@ -37,12 +60,14 @@ function App() {
     }
   }, []);
 
+  // Save the guesses to local storage whenever they change
   useEffect(() => {
     if (guessesLoaded) {
       window.localStorage.setItem("driver-guesses", JSON.stringify(guesses));
     }
   }, [guesses, guessesLoaded]);
 
+  // Load the driver names from the backend when the component mounts
   useEffect(() => {
     const loadDriverNames = async () => {
       try {
@@ -71,7 +96,27 @@ function App() {
 
     loadDriverNames();
   }, []);
+  // Load the daily driver from the backend when the component mounts
+  useEffect(() => {
+    const loadDailyDriver = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/drivers/random`);
 
+        if (!response.ok) {
+          throw new Error("Unable to load the daily driver from the backend");
+        }
+
+        const payload = await response.json();
+        setDailyDriver(payload?.data ?? payload);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    loadDailyDriver();
+  }, []);
+
+  // Handle the search form submission
   const handleSearch = async (event) => {
     event.preventDefault();
 
@@ -99,9 +144,17 @@ function App() {
           : Array.isArray(payload)
             ? payload
             : [];
-
       if (rows[0]) {
-        setGuesses((previousGuesses) => [rows[0], ...previousGuesses]);
+        const comparison = compareDrivers(rows[0], dailyDriver);
+        console.log("Comparison:", comparison);
+        setGuesses((previousGuesses) => [
+          {
+            ...rows[0],
+            comparison,
+          },
+          ...previousGuesses,
+        ]);
+
         setSearchTerm("");
       }
     } catch (err) {
@@ -177,9 +230,9 @@ function App() {
                   {getDriverStats(guessedDriver).map((item, index) => (
                     <div
                       key={item.label}
-                      className={`rounded-xl bg-zinc-800 p-4 text-center text-white shadow-sm ${
+                      className={`rounded-xl p-4 text-center text-white shadow-sm ${
                         index < 2 ? "col-span-3" : "col-span-2"
-                      }`}
+                      } ${getColors(guessedDriver.comparison[item.key])}`}
                     >
                       <div className="text-sm text-zinc-300">{item.label}</div>
                       <div className="mt-2 text-xl font-semibold text-white">

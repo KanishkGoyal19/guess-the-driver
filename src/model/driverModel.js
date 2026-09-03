@@ -9,7 +9,7 @@ export const randomDriverService = async () => {
     LIMIT 1
     ON CONFLICT (selected_date) DO NOTHING;
 
-    SELECT *
+    SELECT drivername, nationality, champion, active, decade, years_active
     FROM driver
     WHERE id = (
       SELECT driver_id
@@ -44,7 +44,7 @@ export const allDriverService = async (searchName = "") => {
   const queryText = trimmed
     ? {
         text: `
-          SELECT *
+          SELECT drivername, nationality, champion, active, decade, years_active
           FROM ${tableName}
           WHERE drivername ILIKE $1
           ORDER BY drivername
@@ -54,7 +54,7 @@ export const allDriverService = async (searchName = "") => {
       }
     : {
         text: `
-          SELECT *
+          SELECT drivername, nationality, champion, active, decade, years_active
           FROM ${tableName}
           ORDER BY drivername
           LIMIT 10
