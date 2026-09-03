@@ -8,6 +8,11 @@ Users can:
 - compare a guessed driver against the daily selected driver
 - use the `/random` endpoint to get the driver of the day
 
+# Important
+
+You can now access the website at https://guess-the-driver.vercel.app/
+It is still a work in progress so some features may not work as expected.
+
 ## Tech Stack
 
 - Frontend: Next.js
