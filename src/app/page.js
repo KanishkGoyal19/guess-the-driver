@@ -16,11 +16,25 @@ function getDriverStats(driver) {
 
 function compareDrivers(guessedDriver, dailyDriver) {
   return {
-    nationality: guessedDriver.nationality === dailyDriver.nationality ? "Correct" : "Wrong",
-    champion: guessedDriver.champion === dailyDriver.champion ? "Correct" : "Wrong",
+    nationality:
+      guessedDriver.nationality === dailyDriver.nationality
+        ? "Correct"
+        : "Wrong",
+    champion:
+      guessedDriver.champion === dailyDriver.champion ? "Correct" : "Wrong",
     active: guessedDriver.active === dailyDriver.active ? "Correct" : "Wrong",
-    decade: guessedDriver.decade === dailyDriver.decade ? "Correct" : Math.abs(guessedDriver.decade - dailyDriver.decade) === 20 ? "Close: " : "Wrong",
-    years_active:guessedDriver.years_active === dailyDriver.years_active? "Correct": Math.abs(guessedDriver.years_active - dailyDriver.years_active) <= 5 ? "Close: " : "Wrong",
+    decade:
+      guessedDriver.decade === dailyDriver.decade
+        ? "Correct"
+        : Math.abs(guessedDriver.decade - dailyDriver.decade) === 20
+          ? "Close: "
+          : "Wrong",
+    years_active:
+      guessedDriver.years_active === dailyDriver.years_active
+        ? "Correct"
+        : Math.abs(guessedDriver.years_active - dailyDriver.years_active) <= 5
+          ? "Close: "
+          : "Wrong",
   };
 }
 
@@ -29,7 +43,7 @@ function getColors(status) {
     case "Correct":
       return "bg-green-600 text-white";
     case "Close: ":
-      return "bg-yellow-600 text-white";  
+      return "bg-yellow-600 text-white";
     default:
       return "bg-zinc-800 text-white";
   }
@@ -42,6 +56,9 @@ function App() {
   const [guessesLoaded, setGuessesLoaded] = useState(false);
   const [error, setError] = useState("");
   const [dailyDriver, setDailyDriver] = useState(null);
+  const gameWon =
+    dailyDriver &&
+    guesses.some((guess) => guess.drivername === dailyDriver.drivername);
 
   // Load the guesses from local storage when the component mounts
   useEffect(() => {
@@ -120,6 +137,10 @@ function App() {
   const handleSearch = async (event) => {
     event.preventDefault();
 
+    if (gameWon || !dailyDriver) {
+      return;
+    }
+
     const trimmedTerm = searchTerm.trim();
     if (!trimmedTerm) {
       return;
@@ -145,8 +166,18 @@ function App() {
             ? payload
             : [];
       if (rows[0]) {
+        const alreadyGuessed = guesses.some(
+          (guess) => guess.drivername === rows[0].drivername,
+        );
+
+        if (alreadyGuessed) {
+          setError("You have already guessed this driver!");
+          return;
+        }
+
         const comparison = compareDrivers(rows[0], dailyDriver);
         console.log("Comparison:", comparison);
+
         setGuesses((previousGuesses) => [
           {
             ...rows[0],
@@ -185,7 +216,8 @@ function App() {
             list="driver-names"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Type a driver name"
+            disabled={gameWon}
+            placeholder={gameWon ? "You have already guessed the driver!" : "Enter a driver name..."}
             className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white outline-none focus:border-red-500"
           />
           <datalist id="driver-names">
@@ -195,14 +227,18 @@ function App() {
           </datalist>
           <button
             type="submit"
-            disabled={!searchTerm.trim()}
+            disabled={!searchTerm.trim() || gameWon}
             className="rounded-lg bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-500"
           >
             Guess
           </button>
         </form>
 
-        {guesses.length === 0 ? (
+        {gameWon ? (
+          <div className="rounded-lg border border-green-700 bg-green-950/50 p-6 text-center text-green-300">
+            Congratulations! You guessed the driver correctly!
+          </div>
+        ) : guesses.length === 0 ? (
           error ? (
             <div className="rounded-lg border border-red-700 bg-red-950/50 p-6 text-center text-red-300">
               {error}
