@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Confetti from '@tholman/confetti'
 
 function getTodayKey() {
   const today = new Date();
@@ -41,6 +42,7 @@ export default function VictoryPage() {
 
   return (
     <main className="min-h-screen bg-zinc-900 px-8 py-16 text-white">
+      <Confetti total={99} />
       <div className="mx-auto w-full max-w-3xl">
         <section className="rounded-lg border border-green-700 bg-green-950/50 p-10 text-center text-green-300">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-green-400">

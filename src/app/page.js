@@ -72,6 +72,7 @@ function App() {
   const gameWon =
     dailyDriver &&
     guesses.some((guess) => guess.drivername === dailyDriver.drivername);
+  const gameLost = !gameWon && guesses.length >= 10;
 
   // Load the guesses from local storage when the component mounts
   useEffect(() => {
@@ -157,7 +158,7 @@ function App() {
   const handleSearch = async (event) => {
     event.preventDefault();
 
-    if (gameWon || !dailyDriver) {
+    if (gameWon || gameLost || !dailyDriver) {
       return;
     }
 
@@ -212,6 +213,12 @@ function App() {
             JSON.stringify({ date: getTodayKey(), guesses: nextGuesses }),
           );
           router.push("/victory");
+        } else if (nextGuesses.length >= 10) {
+          window.localStorage.setItem(
+            "driver-guesses",
+            JSON.stringify({ date: getTodayKey(), guesses: nextGuesses }),
+          );
+          router.push("/loss");
         }
 
         setSearchTerm("");
@@ -246,6 +253,16 @@ function App() {
             </Link>
           </div>
         )}
+        {gameLost && (
+          <div className="mb-6 text-center">
+            <Link
+              href="/loss"
+              className="inline-block rounded-lg border border-red-600 px-5 py-3 font-semibold text-red-300 transition hover:bg-red-900"
+            >
+              View loss screen
+            </Link>
+          </div>
+        )}
         <form
           onSubmit={handleSearch}
           className="mb-8 flex flex-col gap-3 md:flex-row"
@@ -254,8 +271,12 @@ function App() {
             list="driver-names"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            disabled={gameWon}
-            placeholder={gameWon ? "You have already guessed the driver!" : "Enter a driver name..."}
+            disabled={gameWon || gameLost}
+            placeholder={
+              gameWon || gameLost
+                ? "You have used all of today's guesses!"
+                : "Enter a driver name..."
+            }
             className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white outline-none focus:border-red-500"
           />
           <datalist id="driver-names">
@@ -265,7 +286,7 @@ function App() {
           </datalist>
           <button
             type="submit"
-            disabled={!searchTerm.trim() || gameWon}
+            disabled={!searchTerm.trim() || gameWon || gameLost}
             className="rounded-lg bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-500"
           >
             Guess
@@ -285,32 +306,49 @@ function App() {
         ) : (
           <div className="space-y-4">
             {guesses.map((guessedDriver, index) => (
-              <div
-                key={`${guessedDriver.drivername}-${index}`}
-                className="mx-auto max-w-xl rounded-2xl border border-zinc-700 bg-zinc-900 p-6 shadow-lg"
-              >
-                <div className="mb-6 text-center">
-                  {" "}
-                  <h2 className="text-2xl font-bold text-white">
-                    {guessedDriver.drivername}
-                  </h2>
+              <div key={`${guessedDriver.drivername}-${index}`}>
+                <div className="mx-auto max-w-xl rounded-2xl border border-zinc-700 bg-zinc-900 p-6 shadow-lg">
+                  <div className="mb-6 text-center">
+                    <h2 className="text-2xl font-bold text-white">
+                      {guessedDriver.drivername}
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-6 gap-3">
+                    {getDriverStats(guessedDriver).map((item, index) => (
+                      <div
+                        key={item.label}
+                        className={`rounded-xl p-4 text-center text-white shadow-sm ${
+                          index < 2 ? "col-span-3" : "col-span-2"
+                        } ${getColors(guessedDriver.comparison[item.key])}`}
+                      >
+                        <div className="text-sm text-zinc-300">{item.label}</div>
+                        <div className="mt-2 text-xl font-semibold text-white">
+                          {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-6 gap-3">
-                  {getDriverStats(guessedDriver).map((item, index) => (
-                    <div
-                      key={item.label}
-                      className={`rounded-xl p-4 text-center text-white shadow-sm ${
-                        index < 2 ? "col-span-3" : "col-span-2"
-                      } ${getColors(guessedDriver.comparison[item.key])}`}
-                    >
-                      <div className="text-sm text-zinc-300">{item.label}</div>
-                      <div className="mt-2 text-xl font-semibold text-white">
-                        {item.value}
+                {index === guesses.length - 1 && (
+                  <div className="mx-auto mt-6 max-w-xl text-center">
+                    <div className="flex justify-center gap-2 sm:gap-3">
+                      <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-zinc-700 px-3 py-2 text-sm font-medium text-zinc-100">
+                        No Match
+                      </div>
+                      <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-yellow-400 px-3 py-2 text-sm font-medium text-zinc-950">
+                        Close
+                      </div>
+                      <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white">
+                        Match
                       </div>
                     </div>
-                  ))}
-                </div>
+                    <p className="mt-6 text-sm font-semibold leading-5 text-zinc-300">
+                      Use the matching attributes to make more guesses. Good luck!
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
             {error && (
