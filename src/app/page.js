@@ -1,8 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import F1Assistant from "./F1Assistant";
 
 const API_URL =
   process.env.NEXT_PUBLIC_RENDER_API_URL || "http://localhost:5000";
+
+function getTodayKey() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 function getDriverStats(driver) {
   return [
@@ -56,6 +68,7 @@ function App() {
   const [guessesLoaded, setGuessesLoaded] = useState(false);
   const [error, setError] = useState("");
   const [dailyDriver, setDailyDriver] = useState(null);
+  const router = useRouter();
   const gameWon =
     dailyDriver &&
     guesses.some((guess) => guess.drivername === dailyDriver.drivername);
@@ -66,8 +79,12 @@ function App() {
       const savedGuesses = window.localStorage.getItem("driver-guesses");
       if (savedGuesses) {
         const parsedGuesses = JSON.parse(savedGuesses);
-        if (Array.isArray(parsedGuesses)) {
+        if (parsedGuesses?.date === getTodayKey() && Array.isArray(parsedGuesses.guesses)) {
+          setGuesses(parsedGuesses.guesses);
+        } else if (Array.isArray(parsedGuesses)) {
           setGuesses(parsedGuesses);
+        } else {
+          window.localStorage.removeItem("driver-guesses");
         }
       }
     } catch {
@@ -80,7 +97,10 @@ function App() {
   // Save the guesses to local storage whenever they change
   useEffect(() => {
     if (guessesLoaded) {
-      window.localStorage.setItem("driver-guesses", JSON.stringify(guesses));
+      window.localStorage.setItem(
+        "driver-guesses",
+        JSON.stringify({ date: getTodayKey(), guesses }),
+      );
     }
   }, [guesses, guessesLoaded]);
 
@@ -178,13 +198,21 @@ function App() {
         const comparison = compareDrivers(rows[0], dailyDriver);
         console.log("Comparison:", comparison);
 
-        setGuesses((previousGuesses) => [
-          {
-            ...rows[0],
-            comparison,
-          },
-          ...previousGuesses,
-        ]);
+        const guessedDriver = {
+          ...rows[0],
+          comparison,
+        };
+        const nextGuesses = [guessedDriver, ...guesses];
+
+        setGuesses(nextGuesses);
+
+        if (rows[0].drivername === dailyDriver.drivername) {
+          window.localStorage.setItem(
+            "driver-guesses",
+            JSON.stringify({ date: getTodayKey(), guesses: nextGuesses }),
+          );
+          router.push("/victory");
+        }
 
         setSearchTerm("");
       }
@@ -208,6 +236,16 @@ function App() {
         <p className="mb-6 text-center text-zinc-400">
           Guesses: {guesses.length}
         </p>
+        {gameWon && (
+          <div className="mb-6 text-center">
+            <Link
+              href="/victory"
+              className="inline-block rounded-lg border border-green-600 px-5 py-3 font-semibold text-green-300 transition hover:bg-green-900"
+            >
+              View victory screen
+            </Link>
+          </div>
+        )}
         <form
           onSubmit={handleSearch}
           className="mb-8 flex flex-col gap-3 md:flex-row"
@@ -234,11 +272,7 @@ function App() {
           </button>
         </form>
 
-        {gameWon ? (
-          <div className="rounded-lg border border-green-700 bg-green-950/50 p-6 text-center text-green-300">
-            Congratulations! You guessed the driver correctly!
-          </div>
-        ) : guesses.length === 0 ? (
+        {guesses.length === 0 ? (
           error ? (
             <div className="rounded-lg border border-red-700 bg-red-950/50 p-6 text-center text-red-300">
               {error}
@@ -287,6 +321,7 @@ function App() {
           </div>
         )}
       </div>
+      <F1Assistant />
     </div>
   );
 }

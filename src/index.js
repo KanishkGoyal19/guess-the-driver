@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import driverRoutes from "./routes/driverRoutes.js";
+import f1Routes from "./routes/f1Routes.js";
 import pool from "./config/db.js";
 
 dotenv.config();
@@ -13,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/drivers", driverRoutes);
+app.use("/api/f1", f1Routes);
 
 app.get("/health", (req, res) => {
     res.json({ status: "ok" });
