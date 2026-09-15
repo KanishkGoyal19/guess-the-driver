@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const API_URL =
   process.env.NEXT_PUBLIC_RENDER_API_URL || "http://localhost:5000";
@@ -128,7 +128,6 @@ function SelectionControls({ action, options, selection, onChange, onSubmit }) {
 }
 
 export default function F1Assistant() {
-  const [open, setOpen] = useState(false);
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -163,6 +162,10 @@ export default function F1Assistant() {
       setOptionsLoading(false);
     }
   };
+
+  useEffect(() => {
+    queueMicrotask(loadOptions);
+  }, []);
 
   const requestAnswer = async (action, params = {}) => {
     setLoading(true);
@@ -205,35 +208,17 @@ export default function F1Assistant() {
     requestAnswer(pendingAction, selection);
   };
 
-  const handleAssistantToggle = () => {
-    setOpen((current) => {
-      if (!current && options.seasons.length === 0 && !optionsLoading) {
-        loadOptions();
-      }
-      return !current;
-    });
-  };
-
   return (
     <div className="fixed bottom-5 right-5 z-20 sm:bottom-8 sm:right-8">
-      {open && (
-        <section
-          aria-label="F1 Assistant"
-          className="f1-assistant-panel mb-3 w-[calc(100vw-2.5rem)] max-w-sm overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl shadow-black/40"
-        >
-          <header className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/90 px-5 py-4">
+      <section
+        aria-label="F1 Assistant"
+        className="f1-assistant-panel w-[calc(100vw-2.5rem)] max-w-sm overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl shadow-black/40"
+      >
+          <header className="flex items-center justify-between border-b border-red-700 bg-red-600 px-5 py-4">
             <div>
               <p className="text-sm font-bold text-white">🏎️ F1 Assistant</p>
-              <p className="mt-1 text-xs text-zinc-500">Powered by live race data</p>
+              <p className="mt-1 text-xs text-white-500">Powered by live race data</p>
             </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close F1 Assistant"
-              className="rounded-full px-2 py-1 text-xl leading-none text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
-            >
-              ×
-            </button>
           </header>
 
           <div className="p-5">
@@ -299,19 +284,7 @@ export default function F1Assistant() {
               </div>
             )}
           </div>
-        </section>
-      )}
-
-      <button
-        type="button"
-        onClick={handleAssistantToggle}
-        aria-expanded={open}
-        aria-label={open ? "Close F1 Assistant" : "Open F1 Assistant"}
-        className="ml-auto flex items-center gap-2 rounded-full border border-red-500/50 bg-red-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-red-950/40 transition hover:bg-red-500"
-      >
-        <span aria-hidden="true">🏎️</span>
-        <span>F1 Assistant</span>
-      </button>
+      </section>
     </div>
   );
 }

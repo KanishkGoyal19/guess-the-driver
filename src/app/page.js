@@ -235,7 +235,13 @@ function App() {
     .slice(0, 10);
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white flex justify-center">
+    <div
+      className="flex min-h-screen justify-center bg-cover bg-center bg-fixed text-white"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(9, 12, 18, 0.68), rgba(9, 12, 18, 0.82)), url('/image.png')",
+      }}
+    >
       <div className="w-full max-w-6xl p-8">
         <h1 className="text-5xl font-bold text-center text-red-500 mb-2">
           F1 Driver Guesser
@@ -298,11 +304,7 @@ function App() {
             <div className="rounded-lg border border-red-700 bg-red-950/50 p-6 text-center text-red-300">
               {error}
             </div>
-          ) : (
-            <div className="rounded-lg border border-zinc-700 p-6 text-center text-zinc-400">
-              Make a guess for todays driver!
-            </div>
-          )
+          ) : null
         ) : (
           <div className="space-y-4">
             {guesses.map((guessedDriver, index) => (

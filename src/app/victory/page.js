@@ -41,7 +41,10 @@ export default function VictoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-900 px-8 py-16 text-white">
+    <main className="min-h-screen px-8 py-16 text-white" style={{
+        backgroundImage:
+          "linear-gradient(rgba(9, 12, 18, 0.68), rgba(9, 12, 18, 0.82)), url('/image.png')",
+      }}>
       <Confetti total={99} />
       <div className="mx-auto w-full max-w-3xl">
         <section className="rounded-lg border border-green-700 bg-green-950/50 p-10 text-center text-green-300">

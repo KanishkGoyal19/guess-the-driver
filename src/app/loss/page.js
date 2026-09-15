@@ -37,7 +37,11 @@ export default function LossPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-900 px-8 py-16 text-white">
+    <main className="min-h-screen px-8 py-16 text-white" 
+    style={{
+        backgroundImage:
+          "linear-gradient(rgba(9, 12, 18, 0.68), rgba(9, 12, 18, 0.82)), url('/image.png')",
+      }}>
       <div className="mx-auto w-full max-w-3xl">
         <section className="rounded-lg border border-red-700 bg-red-950/50 p-10 text-center text-red-300">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-red-400">
