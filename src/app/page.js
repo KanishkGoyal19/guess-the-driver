@@ -339,7 +339,7 @@ function App() {
                       <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-zinc-700 px-3 py-2 text-sm font-medium text-zinc-100">
                         No Match
                       </div>
-                      <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-yellow-400 px-3 py-2 text-sm font-medium text-zinc-950">
+                      <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-yellow-600 px-3 py-2 text-sm font-medium text-zinc-950">
                         Close
                       </div>
                       <div className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white">
